@@ -40,7 +40,8 @@ jobs:
       - name: Build container image with Cloud Build
         run: |
           IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${SERVICE_NAME}:${GITHUB_SHA::7}"
-          gcloud builds submit --tag "$IMAGE" --quiet
+          # --suppress-logs: avoid streaming logs from the default Cloud Build
+          gcloud builds submit --tag "$IMAGE" --suppress-logs --quiet
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
       - name: Deploy to Cloud Run
