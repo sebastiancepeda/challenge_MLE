@@ -39,9 +39,34 @@ jobs:
 
       - name: Build container image with Cloud Build
         run: |
+          set -euo pipefail
           IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${SERVICE_NAME}:${GITHUB_SHA::7}"
-          # --suppress-logs: avoid streaming logs from the default Cloud Build
-          gcloud builds submit --tag "$IMAGE" --suppress-logs --quiet
+
+          BUILD_ID=$(gcloud builds submit --tag "$IMAGE" --async --format='value(id)' --quiet)
+          echo "Submitted Cloud Build: $BUILD_ID"
+          echo "Console: https://console.cloud.google.com/cloud-build/builds/${BUILD_ID}?project=${{ secrets.GCP_PROJECT_ID }}"
+
+          while true; do
+            STATUS=$(gcloud builds describe "$BUILD_ID" --format='value(status)' 2>/dev/null || echo "UNKNOWN")
+            case "$STATUS" in
+              SUCCESS)
+                echo "Build $BUILD_ID succeeded"
+                break
+                ;;
+              FAILURE|INTERNAL_ERROR|TIMEOUT|CANCELLED|EXPIRED)
+                echo "Build $BUILD_ID ended in status: $STATUS"
+                exit 1
+                ;;
+              QUEUED|WORKING|PENDING|STATUS_UNKNOWN|UNKNOWN)
+                sleep 10
+                ;;
+              *)
+                echo "Unexpected build status: $STATUS"
+                exit 1
+                ;;
+            esac
+          done
+
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
       - name: Deploy to Cloud Run
