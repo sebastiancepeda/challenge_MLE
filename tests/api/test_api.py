@@ -2,12 +2,15 @@ import unittest
 
 from fastapi.testclient import TestClient
 from challenge import app
+from challenge.api import train_model_on_startup
 
 
 class TestBatchPipeline(unittest.TestCase):
     def setUp(self):
+        train_model_on_startup()
         self.client = TestClient(app)
-        
+
+
     def test_should_get_predict(self):
         data = {
             "flights": [
@@ -18,7 +21,6 @@ class TestBatchPipeline(unittest.TestCase):
                 }
             ]
         }
-        # when("xgboost.XGBClassifier").predict(ANY).thenReturn(np.array([0])) # change this line to the model of chosing
         response = self.client.post("/predict", json=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"predict": [0]})
@@ -34,7 +36,6 @@ class TestBatchPipeline(unittest.TestCase):
                 }
             ]
         }
-        # when("xgboost.XGBClassifier").predict(ANY).thenReturn(np.array([0]))# change this line to the model of chosing
         response = self.client.post("/predict", json=data)
         self.assertEqual(response.status_code, 400)
 
@@ -48,7 +49,6 @@ class TestBatchPipeline(unittest.TestCase):
                 }
             ]
         }
-        # when("xgboost.XGBClassifier").predict(ANY).thenReturn(np.array([0]))# change this line to the model of chosing
         response = self.client.post("/predict", json=data)
         self.assertEqual(response.status_code, 400)
     
@@ -62,6 +62,5 @@ class TestBatchPipeline(unittest.TestCase):
                 }
             ]
         }
-        # when("xgboost.XGBClassifier").predict(ANY).thenReturn(np.array([0]))
         response = self.client.post("/predict", json=data)
         self.assertEqual(response.status_code, 400)
