@@ -82,7 +82,7 @@ async def get_health() -> dict:
 
 
 @app.post("/predict", status_code=200)
-async def post_predict(request: PredictRequest) -> dict:
+def post_predict(request: PredictRequest) -> dict:
     """Score a batch of flights and return one 0/1 delay prediction per flight.
 
     The list in "predict" is in the same order as the input "flights".

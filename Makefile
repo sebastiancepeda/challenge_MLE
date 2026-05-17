@@ -23,11 +23,11 @@ install:		## Install dependencies
 	$(ENV_PREFIX)pip install -r requirements-test.txt
 	$(ENV_PREFIX)pip install -r requirements.txt
 
-STRESS_URL = http://127.0.0.1:8000 
+STRESS_URL = https://latam-delay-api-jklkpx77uq-uc.a.run.app
 .PHONY: stress-test
 stress-test:
-	# change stress url to your deployed app 
-	mkdir reports || true
+	@mkdir -p reports
+	@curl -fsS -o /dev/null $(STRESS_URL)/health
 	$(ENV_PREFIX)locust -f tests/stress/api_stress.py --print-stats --html reports/stress-test.html --run-time 60s --headless --users 100 --spawn-rate 1 -H $(STRESS_URL)
 
 .PHONY: model-test
