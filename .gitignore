@@ -60,6 +60,3 @@ Thumbs.db
 # Local env files
 .env
 .env.local
-
-# Local-only planning doc (do not commit)
-plan.md
